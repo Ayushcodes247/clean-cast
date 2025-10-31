@@ -1,3 +1,5 @@
+require('module-alias/register');
+
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -10,9 +12,10 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 
 
-const connectDB = require('./configs/DB/db.config');
-const sessionStore = require('./configs/DB/sessionStorage.config');
-
+const connectDB = require('@configs/DB/db.config');
+const sessionStore = require('@configs/DB/sessionStorage.config');
+const passport = require('@configs/passport.config');
+const facebookRoute = require('@routes/facebook.route');
 
 connectDB();
 app.use(express.json());
@@ -41,6 +44,11 @@ app.use(session({
         sameSite : "lax"
     },
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use('/auth/facebook' , facebookRoute);
 
 app.get('/', (req,res) => {
     res.status(200).json({ message : "Clean Cast API Running"})

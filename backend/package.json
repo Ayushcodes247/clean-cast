@@ -10,8 +10,18 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "_moduleAliases": {
+    "@models": "./models",
+    "@routes": "./routes",
+    "@controllers": "./controllers",
+    "@middlewares": "./middlewares",
+    "@utils": "./utils",
+    "@configs": "./configs",
+    "@root": "/"
+  },
   "type": "commonjs",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -22,6 +32,7 @@
     "express-validator": "^7.3.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
     "mongoose": "^8.19.2",
     "morgan": "^1.10.1",
     "nodemailer": "^7.0.10",
