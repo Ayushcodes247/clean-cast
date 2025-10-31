@@ -34,3 +34,13 @@ module.exports.createUser = async ({
 
   return user;
 };
+
+module.exports.findByEmail = async ({ email }) => {
+  if (!email) {
+    throw new Error("Email is required for login.");
+  }
+
+  const user = await userModel.findOne({ email }).select("+password");
+
+  return user;
+};

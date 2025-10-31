@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { register } = require("@controllers/user.controller");
+const { register, login } = require("@controllers/user.controller");
 const { body } = require("express-validator");
 
 router.post(
@@ -28,6 +28,20 @@ router.post(
       .withMessage("Account type must be either public or private."),
   ],
   register
+);
+
+router.post(
+  "/login",
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Please provide a valid email address."),
+    body("password")
+      .isString()
+      .isLength({ min: 8 })
+      .withMessage("Password should be at least 8 characters long."),
+  ],
+  login
 );
 
 module.exports = router;
