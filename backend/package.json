@@ -17,6 +17,7 @@
     "@middlewares": "./middlewares",
     "@utils": "./utils",
     "@configs": "./configs",
+    "@services": "./services",
     "@root": "/"
   },
   "type": "commonjs",

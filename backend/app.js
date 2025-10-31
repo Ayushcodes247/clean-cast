@@ -16,6 +16,7 @@ const connectDB = require('@configs/DB/db.config');
 const sessionStore = require('@configs/DB/sessionStorage.config');
 const passport = require('@configs/passport.config');
 const facebookRoute = require('@routes/facebook.route');
+const userRouter = require('@routes/user.route');
 
 connectDB();
 app.use(express.json());
@@ -50,9 +51,7 @@ app.use(passport.session());
 
 app.use('/auth/facebook' , facebookRoute);
 
-app.get('/', (req,res) => {
-    res.status(200).json({ message : "Clean Cast API Running"})
-});
+app.use('/api/users/', userRouter);
 
 app.get('/health', (req,res) => res.status(200).json({ status: "ok" }));
 
