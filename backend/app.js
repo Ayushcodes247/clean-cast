@@ -57,10 +57,20 @@ app.use("/api/users/", userRouter);
 app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 
 const rateLimit = require("express-rate-limit");
+// General API rate limiter
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { message: "Too many requests, please try again later." },
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: {
+    success: false,
+    message: "Too many requests, please try again later.",
+  },
+  standardHeaders: true, // Include rate limit info in headers
+  legacyHeaders: false, // Disable deprecated X-RateLimit-* headers
+  handler: (req, res, next, options) => {
+    console.warn(`Rate limit exceeded by IP: ${req.ip}`);
+    res.status(options.statusCode).json(options.message);
+  },
 });
 
 app.use("/api/", apiLimiter);

@@ -27,7 +27,7 @@ module.exports.authenticateUser = async (req, res, next) => {
     // Verify JWT
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.USERMICRO_JWT_SECRET);
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
       return res.status(401).json({
         success: false,
