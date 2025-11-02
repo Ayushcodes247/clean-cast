@@ -5,6 +5,7 @@ const {
   login,
   profile,
   logout,
+  supUpload,
 } = require("@controllers/user.controller");
 const { body } = require("express-validator");
 const { authenticateUser } = require("@middlewares/user.middleware");
@@ -54,5 +55,11 @@ router.post("/login", limiter, loginValidation, login);
  */
 router.get("/profile", authenticateUser, profile);
 router.post("/logout", authenticateUser, logout);
+
+/**
+ * Suppoter Routes For Image Functionality
+ */
+
+router.post("/post/image" , authenticateUser , supUpload);
 
 module.exports = router;

@@ -11,10 +11,10 @@ const jwt = require("jsonwebtoken");
 const userSchema = new mongoose.Schema(
   {
     profileId: {
-        type: String,
-        trim: true,
-        unique: true,
-        index: true
+      type: String,
+      trim: true,
+      unique: true,
+      index: true,
     },
     username: {
       type: String,
@@ -60,6 +60,24 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    imageCollection: [
+      {
+        imageId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Image",
+          required: true,
+        },
+        imageUrl: {
+          type: String,
+          required: true,
+        },
+        fileId: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+
     socketId: {
       type: String,
       default: null,
@@ -72,15 +90,19 @@ const userSchema = new mongoose.Schema(
 // ---------------------------
 // Index for optimized queries
 // ---------------------------
-userSchema.index({ username: 1, email: 1, accountType: 1 , profileId: 1 });
+userSchema.index({ username: 1, email: 1, accountType: 1, profileId: 1 });
 
 // ---------------------------
 // JWT Generation
 // ---------------------------
 userSchema.methods.generateAuthToken = function () {
-  return jwt.sign({ _id: this._id , email: this.email }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
+  return jwt.sign(
+    { _id: this._id, email: this.email },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
 };
 
 // ---------------------------

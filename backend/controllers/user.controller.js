@@ -193,3 +193,11 @@ module.exports.logout = async (req, res) => {
     });
   }
 };
+
+module.exports.supUpload = async (req, res) => {
+  try{
+
+  }catch(error){
+    
+  }
+};
