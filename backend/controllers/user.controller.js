@@ -195,9 +195,41 @@ module.exports.logout = async (req, res) => {
 };
 
 module.exports.supUpload = async (req, res) => {
-  try{
+  try {
+    const userId = req.user?._id;
+    const { fileId, imageUrl, imageId } = req.body;
 
-  }catch(error){
-    
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthenticated user." });
+    }
+
+    if (!fileId || !imageUrl || !imageId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required image fields." });
+    }
+
+    const existing = await userModel.findById(userId);
+    if (!existing) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
+    }
+
+    existing.imageCollection.push({ imageId, imageUrl, fileId });
+    await existing.save();
+
+    return res.status(201).json({
+      success: true,
+      data: existing,
+      message: "Image Post Created successfully.",
+    });
+  } catch (error) {
+    console.error("Error while Posting image:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error." });
   }
 };
