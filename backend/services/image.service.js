@@ -3,19 +3,24 @@ const imageModel = require("@models/image.model");
 module.exports.createImageForUpload = async ({
   imageUrl,
   uid,
+  uName,
   description,
   fileId,
+  uAccountType,
 }) => {
-  if (!imageUrl || !uid || !fileId) {
-    throw new Error("Image URL , User ID and File ID are required.");
+  if (!uName || !uAccountType || !imageUrl || !uid || !fileId) {
+    throw new Error(
+      "Image URL , User ID , User Account-Type and File ID are required."
+    );
   }
   try {
-
     const imageUpload = await imageModel.create({
-        uid,
-        imageUrl,
-        fileId,
-        description
+      uid,
+      uName,
+      uAccountType,
+      imageUrl,
+      fileId,
+      description,
     });
 
     return imageUpload;

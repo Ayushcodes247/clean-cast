@@ -9,6 +9,18 @@ const imageSchema = new mongoose.Schema(
       required: true,
     },
 
+    uAccountType: {
+      type: String,
+      ref: "User",
+      required: true,
+    },
+
+    uName: {
+      type: String,
+      ref: "User",
+      required: true,
+    },
+
     imageUrl: {
       type: String,
       required: true,
@@ -24,6 +36,28 @@ const imageSchema = new mongoose.Schema(
       type: String,
       maxlength: [200, "Description cannot be more than 200 characters"],
       default: "",
+    },
+
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
+
+    commentCount: {
+      type: Number,
+      default: 0,
+    },
+
+    likedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    viewsCount: {
+      type: Number,
+      default: 0,
     },
   },
   {

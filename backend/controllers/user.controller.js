@@ -194,6 +194,8 @@ module.exports.logout = async (req, res) => {
   }
 };
 
+/* Suppoter Controller */
+
 module.exports.supUpload = async (req, res) => {
   try {
     const userId = req.user?._id;

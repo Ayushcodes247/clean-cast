@@ -7,6 +7,7 @@ module.exports.uploadImage = async (req, res) => {
   try {
     const { uid } = req.params;
     const user = req.user;
+    const accountType = user.accountType;
     const token =
       req.cookies?.token ||
       req.cookies?.fb_auth_token ||
@@ -49,6 +50,8 @@ module.exports.uploadImage = async (req, res) => {
 
     const uploadImage = await createImageForUpload({
       uid,
+      uName : req.user?.username,
+      uAccountType: accountType,
       imageUrl: image.url,
       fileId: image.fileId,
       description: description || "",

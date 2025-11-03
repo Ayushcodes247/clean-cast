@@ -17,6 +17,7 @@ const passport = require("@configs/passport.config");
 const facebookRoute = require("@routes/facebook.route");
 const userRouter = require("@routes/user.route");
 const imageRouter = require("@routes/image.route");
+const feedsImageRouter = require("@routes/feeds.route");
 
 connectDB();
 app.use(express.json());
@@ -56,6 +57,8 @@ app.use("/auth/facebook", facebookRoute);
 app.use("/api/users/", userRouter);
 
 app.use("/api/images/", imageRouter);
+
+app.use("/api/feeds/image", feedsImageRouter);
 
 app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 
