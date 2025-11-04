@@ -50,7 +50,7 @@ module.exports.uploadImage = async (req, res) => {
 
     const uploadImage = await createImageForUpload({
       uid,
-      uName : req.user?.username,
+      uName: req.user?.username,
       uAccountType: accountType,
       imageUrl: image.url,
       fileId: image.fileId,
@@ -84,5 +84,72 @@ module.exports.uploadImage = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error." });
+  }
+};
+
+module.exports.deleteImage = async (req, res) => {
+  try {
+    const user = req.user;
+    const token =
+      req.cookies?.token ||
+      req.cookies?.fb_auth_token ||
+      req.headers?.authorization?.split(" ")[1];
+
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    const { fileId } = req.params;
+    if (!fileId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "File ID parameter is required." });
+    }
+
+    const image = await imageModel.findOne({ uid: user._id, fileId });
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        message: `No image found for user ${user._id} with fileId ${fileId}.`,
+      });
+    }
+
+    try {
+      await imageKit.deleteFile(fileId);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Failed to delete image from storage.",
+        error: error.message,
+      });
+    }
+
+    await imageModel.findOneAndDelete({ uid: user._id, fileId });
+
+    await axios.post(
+      `http://localhost:${process.env.PORT}/api/users/post/image/delete`,
+      {
+        fileId,
+      },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Image deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Error while deleting post:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error.message,
+    });
   }
 };

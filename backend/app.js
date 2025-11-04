@@ -58,7 +58,7 @@ app.use("/api/users/", userRouter);
 
 app.use("/api/images/", imageRouter);
 
-app.use("/api/feeds/image", feedsImageRouter);
+app.use("/api/feeds/", feedsImageRouter);
 
 app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 

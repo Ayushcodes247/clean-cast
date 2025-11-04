@@ -65,6 +65,52 @@ module.exports.feedImage = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.addViews = async (req, res) => {
+  try {
+    const user = req.user;
+    const { imgId } = req.params;
+
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    if (!imgId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Image ID is required." });
+    }
+
+    const updatedImage = await imageModel.findByIdAndUpdate(
+      imgId,
+      { $inc: { viewsCount: 1 } },
+      { new: true }
+    );
+
+    if (!updatedImage) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Image not found." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "View count incremented successfully.",
+      imageId: updatedImage._id,
+      viewsCount: updatedImage.viewsCount,
+    });
+  } catch (error) {
+    console.error("Error while adding views:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error.message,
     });
   }
 };

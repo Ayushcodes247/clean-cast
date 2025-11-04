@@ -6,6 +6,7 @@ const {
   profile,
   logout,
   supUpload,
+  supDelete,
 } = require("@controllers/user.controller");
 const { body } = require("express-validator");
 const { authenticateUser } = require("@middlewares/user.middleware");
@@ -25,7 +26,10 @@ const registerValidation = [
     .isString()
     .isLength({ min: 8 })
     .withMessage("Password should be at least 8 characters long."),
-  body("age").optional().isInt({ min: 16 }).withMessage("Age must be 16 or older."),
+  body("age")
+    .optional()
+    .isInt({ min: 16 })
+    .withMessage("Age must be 16 or older."),
   body("gender")
     .optional()
     .isIn(["male", "female", "other"])
@@ -44,6 +48,16 @@ const loginValidation = [
     .withMessage("Password should be at least 8 characters long."),
 ];
 
+const uploadValidation = [
+  body("fileId").isString().withMessage("Please provide a fileId"),
+  body("imageUrl").isString().withMessage("Please provide imageUrl"),
+  body("imageId").isString().withMessage("Please provide imageId"),
+];
+
+const deletionValidation = [
+  body("fileId").isString().withMessage("Please provide a fileId"),
+];
+
 /**
  * Auth Routes
  */
@@ -60,6 +74,13 @@ router.post("/logout", authenticateUser, logout);
  * Suppoter Routes For Image Functionality
  */
 
-router.post("/post/image" , authenticateUser , supUpload);
+router.post("/post/image", authenticateUser, uploadValidation, supUpload);
+
+router.post(
+  "/post/image/delete",
+  authenticateUser,
+  deletionValidation,
+  supDelete
+);
 
 module.exports = router;

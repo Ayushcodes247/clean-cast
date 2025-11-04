@@ -198,6 +198,15 @@ module.exports.logout = async (req, res) => {
 
 module.exports.supUpload = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed.",
+        errors: errors.array(),
+      });
+    }
+
     const userId = req.user?._id;
     const { fileId, imageUrl, imageId } = req.body;
 
@@ -233,5 +242,58 @@ module.exports.supUpload = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal server error." });
+  }
+};
+module.exports.supDelete = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed.",
+        errors: errors.array(),
+      });
+    }
+
+    const user = req.user;
+    const { fileId } = req.body;
+
+    if (!user || !user._id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user.",
+      });
+    }
+
+    if (!fileId) {
+      return res.status(400).json({
+        success: false,
+        message: "File ID not provided.",
+      });
+    }
+
+    const result = await userModel.updateOne(
+      { _id: user._id },
+      { $pull: { imageCollection: { fileId } } }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Image not found in user's collection.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Image deleted successfully from user's collection.",
+    });
+  } catch (error) {
+    console.error("Error while deleting Image data:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete image from user data.",
+      error: error.message,
+    });
   }
 };
