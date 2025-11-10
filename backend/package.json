@@ -1,0 +1,33 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "dev": "npx nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "_moduleAliases": {
+    "@controllers": "./controllers",
+    "@models": "./models",
+    "@utils": "./utils",
+    "@routes": "./routes",
+    "@middlewares": "./middlewares",
+    "@root": "./",
+    "@configs" : "./configs"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
+    "mongoose": "^8.19.3",
+    "multer": "^2.0.2"
+  }
+}
