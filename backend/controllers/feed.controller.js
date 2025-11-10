@@ -114,3 +114,64 @@ module.exports.addViews = async (req, res) => {
     });
   }
 };
+
+module.exports.addLike = async (req, res) => {
+  try {
+    const user = req.user;
+    const { imgId } = req.params;
+
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    if (!imgId) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Image ID not provided in the params.",
+        });
+    }
+
+    const image = await imageModel.findById(imgId);
+    if (!image) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Image not found." });
+    }
+
+    const userId = user?._id.toString();
+    const hasLiked = image.likedBy.includes(userId);
+
+    if (hasLiked) {
+      await imageModel.findByIdAndUpdate(imgId, {
+        $pull: { likedBy: userId },
+        $inc: { likesCount: -1 },
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Image unliked successfully.",
+      });
+    }
+
+    await imageModel.findByIdAndUpdate(imgId, {
+      $addToSet: { likedBy: userId },
+      $inc: { likesCount: 1 },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Image liked successfully.",
+    });
+  } catch (error) {
+    console.error("Error while liking the image post:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+};

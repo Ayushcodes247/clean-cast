@@ -78,6 +78,21 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    videoCollection : [
+      {
+        videoId : {
+          type : mongoose.Schema.Types.ObjectId,
+          ref : "Video",
+          required : true
+        },
+        videoUrl: {
+          type : String,
+          required : true
+        },
+        
+      }
+    ],
+
     socketId: {
       type: String,
       default: null,

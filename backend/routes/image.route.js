@@ -3,7 +3,7 @@ const router = express.Router();
 const { authenticateUser } = require("@middlewares/user.middleware");
 const upload = require("@configs/multer.config");
 const { authenticateImage } = require("@middlewares/image.middleware");
-const { uploadImage, deleteImage } = require("@controllers/image.controller");
+const { uploadImage, deleteImage, allImages } = require("@controllers/image.controller");
 
 router.post(
   "/upload/:uid",
@@ -13,6 +13,8 @@ router.post(
   uploadImage
 );
 
-router.delete("/delete/img/:fileId", authenticateUser, deleteImage);
+router.get("/all", authenticateUser, allImages);
+
+router.delete("/delete/:fileId", authenticateUser, deleteImage);
 
 module.exports = router;
