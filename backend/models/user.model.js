@@ -85,11 +85,11 @@ userSchema.methods.generateAuthToken = function () {
 };
 
 userSchema.statics.hashPassword = async function (plainPassword) {
-  return bcrypt.hash(plainPassword, 12);
+  return await bcrypt.hash(plainPassword, 12);
 };
 
 userSchema.methods.comparePassword = async function (plainPassword) {
-  return bcrypt.compare(plainPassword, this.password);
+  return await bcrypt.compare(plainPassword, this.password);
 };
 
 function validateUser(data) {
