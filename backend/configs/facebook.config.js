@@ -11,71 +11,49 @@ passport.use(
       clientID: process.env.APP_ID,
       clientSecret: process.env.APP_SECRET,
       callbackURL: "http://localhost:4000/auth/facebook/callback",
-      profileFields: [
-        "id",
-        "displayName",
-        "emails",
-        "birthday",
-        "photos",
-      ],
+      profileFields: ["id", "displayName", "emails", "birthday", "photos"],
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        let user = await userModel.findOne({
+          email: profile.emails?.[0]?.value,
+        });
 
-        console.log("Profile:", Number(profile.birthday));
-
-        const email =
-          profile.emails?.[0]?.value || `${profile.id}@facebook.com`;
-        const username = profile.displayName || "Facebook User";
-        const age = profile.ageRange?.max;
-
-        let gender = profile.gender?.toLowerCase();
-        if (!["male", "female", "other"].includes(gender)) gender = "other";      
-        const accountType = "private";
-        const profilePic = profile.photos?.[0]?.value || null;
-
-        // generate alphanumeric pid
-        const pid = pidGenerator().replace(/[^a-zA-Z0-9]/g, "");
-
-        let user = await userModel.findOne({ email });
-
+        const genPass = generatePass(12);
+        const hashPass = await userModel.hashPassword(genPass);
+        const pid = pidGenerator();
+        
         if (!user) {
-          console.log(age);
-          const plainPass = generatePass(16);
-          const hashedPassword = await userModel.hashPassword(plainPass);
-
-          const newUserData = {
-            username,
-            email,
-            password : hashedPassword,
-            age : Number(age),
-            gender,
-            accountType,
-            profilePic,
-            pid,
+          const userData = {
+            username: profile.displayName,
+            email: profile.emails?.[0]?.value,
+            password: hashPass,
+            age: 17,
+            gender: "other",
+            accountType: "private",
+            pid: pid,
+            profilePic: "http://localhost:4000/images/avatar.jpg",
           };
 
-          const { error } = validateUser(newUserData);
+          const { error } = await validateUser(userData);
+
           if (error) {
-            console.error("Validation failed:", error.details[0].message);
+            console.error("Error while validating user:", error.message);
             return done(error, null);
           }
 
-          user = await userModel.create(newUserData);
-        }
+          user = await userModel.create(userData);
 
-        const token =
-          typeof user.generateAuthToken === "function"
-            ? user.generateAuthToken()
-            : jwt.sign(
-                { id: user._id, email: user.email, pid: user.pid },
-                process.env.JWT_SECRET,
-                { expiresIn: "7d" }
-              );
+          const token = user.generateAuthToken();
 
-        return done(null, { user, token });
+          return done(null,{ user , token });
+        };
+
+        const token = user.generateAuthToken();
+
+        return done(null, { user , token });
       } catch (error) {
-        console.error("Error in Facebook Strategy:", error.message);
+        console.error("Facebook authentication error:", error.message);
         return done(error, null);
       }
     }

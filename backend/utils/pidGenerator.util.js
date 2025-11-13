@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const pidGenerator = () => {
     const randomPart = crypto.randomBytes(4).toString("hex");
     const timestampPart = Date.now().toString(36);
-    return `CC-${timestampPart}-${randomPart}`.toUpperCase();
+    return `${timestampPart}${randomPart}`.toUpperCase();
 };
 
 module.exports = pidGenerator;
