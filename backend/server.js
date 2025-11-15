@@ -4,11 +4,13 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  console.info(
-    `[${new Date().toISOString()}] CleanCast server is running on port ${PORT}`
-  );
-});
+if (process.env.NODE_ENV === "production") {
+  server.listen(PORT, () => {
+    console.info(
+      `[${new Date().toISOString()}] CleanCast server is running on port ${PORT}`
+    );
+  });
+}
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error(

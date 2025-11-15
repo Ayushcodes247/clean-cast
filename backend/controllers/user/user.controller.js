@@ -193,7 +193,7 @@ module.exports.logout = async (req, res) => {
 
     await blackListTokenModel.create({ token });
 
-    res.clearCookie("token", {
+    res.clearCookie("register_token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
