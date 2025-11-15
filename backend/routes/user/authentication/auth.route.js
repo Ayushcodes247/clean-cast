@@ -60,4 +60,6 @@ router.get("/profile", authenticateUser, profile);
 
 router.post("/logout", authenticateUser, logout);
 
+router.delete("/delete", authenticateUser , );
+
 module.exports = router;

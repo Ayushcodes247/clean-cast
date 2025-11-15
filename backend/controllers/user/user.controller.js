@@ -191,7 +191,7 @@ module.exports.logout = async (req, res) => {
       });
     }
 
-    await blackListTokenModel.create({ token });
+    await blackListTokenModel.create({ token: value.token });
 
     res.clearCookie("register_token", {
       httpOnly: true,
@@ -220,6 +220,49 @@ module.exports.logout = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error while logging out.",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.delete = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    const findUser = await userModel.findById(user._id);
+    if (!findUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.clearCookie("register_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.clearCookie("login_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.clearCookie("fb_auth_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    await findUser.deleteOne();
+  } catch (error) {
+    console.error("Error while Deleting Account:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in deleting the account.",
       error: error.message,
     });
   }
