@@ -58,7 +58,7 @@ app.use(passport.session());
 
 app.use(checkDBConnection);
 
-app.use("/", masterRateLimiter , checkDBConnection , router);
+app.use("/api/", masterRateLimiter , checkDBConnection , router);
 
 app.get("/health", (req, res) => {
   return res.status(200).json({ status: "ok", message: "App running fine." });
