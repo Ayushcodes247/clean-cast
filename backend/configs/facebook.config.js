@@ -4,13 +4,14 @@ const jwt = require("jsonwebtoken");
 const { userModel, validateUser } = require("@models/user.model");
 const pidGenerator = require("@utils/pidGenerator.util");
 const generatePass = require("@utils/fbpassgenerator.util");
+const sendEmail = require("@configs/nodemailer.config");
 
 passport.use(
   new FacebookStrategy(
     {
       clientID: process.env.APP_ID,
       clientSecret: process.env.APP_SECRET,
-      callbackURL: "http://localhost:4000/auth/facebook/callback",
+      callbackURL: "http://localhost:4000/api/auth/facebook/callback",
       profileFields: ["id", "displayName", "emails", "birthday", "photos"],
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -22,7 +23,7 @@ passport.use(
         const genPass = generatePass(12);
         const hashPass = await userModel.hashPassword(genPass);
         const pid = pidGenerator();
-        
+
         if (!user) {
           const userData = {
             username: profile.displayName,
@@ -35,6 +36,20 @@ passport.use(
             profilePic: "http://localhost:4000/images/avatar.jpg",
           };
 
+          const subject =
+            "LOGIN PASSWORD FOR THE USER WHO IS REGISTERED VIA. FACEBOOK REGISTER/LOGIN";
+          const text = `
+          Hi ${userData.username || "User"},
+
+          You have successfully registered via. facebook and here is your password for manual login.
+          ${userData.username}'s Password : ${genPass}.
+
+          Regards,
+          CleanCast support 
+          `;
+
+          await sendEmail(userData.email, subject, text);
+
           const { error } = await validateUser(userData);
 
           if (error) {
@@ -46,12 +61,12 @@ passport.use(
 
           const token = user.generateAuthToken();
 
-          return done(null,{ user , token });
-        };
+          return done(null, { user, token });
+        }
 
         const token = user.generateAuthToken();
 
-        return done(null, { user , token });
+        return done(null, { user, token });
       } catch (error) {
         console.error("Facebook authentication error:", error.message);
         return done(error, null);

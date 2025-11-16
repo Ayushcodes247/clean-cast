@@ -5,6 +5,13 @@ const {
   blackListTokenModel,
   validateToken,
 } = require("@models/blackListToken.model");
+const {
+  deletionModel,
+  validateDeletionData,
+} = require("@models/deletion.model");
+const sendEmail = require("@configs/nodemailer.config");
+
+const TOKEN_NAME = "auth_token";
 
 module.exports.register = async (req, res) => {
   try {
@@ -31,9 +38,7 @@ module.exports.register = async (req, res) => {
     };
 
     const { error } = validateUser(userObject);
-
     if (error) {
-      console.error("Joi Validation Error:", error.details);
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -58,7 +63,7 @@ module.exports.register = async (req, res) => {
 
     const token = user.generateAuthToken();
 
-    res.cookie("register_token", token, {
+    res.cookie(TOKEN_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -72,8 +77,6 @@ module.exports.register = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error("Registration Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "User registration failed.",
@@ -93,21 +96,23 @@ module.exports.login = async (req, res) => {
 
     const user = await userModel.findOne({ email }).select("+password");
     if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password." });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password.",
+      });
     }
 
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid email or password." });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password.",
+      });
     }
 
     const token = user.generateAuthToken();
 
-    res.cookie("login_token", token, {
+    res.cookie(TOKEN_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -127,7 +132,6 @@ module.exports.login = async (req, res) => {
       user: safeUser,
     });
   } catch (error) {
-    console.error("Login Error:", error);
     return res.status(500).json({
       success: false,
       message: "User login failed.",
@@ -148,6 +152,7 @@ module.exports.profile = async (req, res) => {
       .findById(req.user._id)
       .select("-password -__v")
       .lean();
+
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
@@ -158,7 +163,6 @@ module.exports.profile = async (req, res) => {
       message: "User profile fetched successfully.",
     });
   } catch (error) {
-    console.error("Error fetching user profile:", error);
     return res.status(500).json({
       success: false,
       message: "Error while fetching profile.",
@@ -170,9 +174,7 @@ module.exports.profile = async (req, res) => {
 module.exports.logout = async (req, res) => {
   try {
     const token =
-      req.cookies?.register_token ||
-      req.cookies?.login_token ||
-      req.cookies?.fb_auth_token ||
+      req.cookies?.[TOKEN_NAME] ||
       (req.headers?.authorization?.startsWith("Bearer ")
         ? req.headers.authorization.split(" ")[1]
         : null);
@@ -183,7 +185,6 @@ module.exports.logout = async (req, res) => {
 
     const { value, error } = validateToken({ token });
     if (error) {
-      console.error("Joi Validation Error:", error.details);
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -193,19 +194,7 @@ module.exports.logout = async (req, res) => {
 
     await blackListTokenModel.create({ token: value.token });
 
-    res.clearCookie("register_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
-
-    res.clearCookie("login_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
-
-    res.clearCookie("fb_auth_token", {
+    res.clearCookie(TOKEN_NAME, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -216,7 +205,6 @@ module.exports.logout = async (req, res) => {
       message: "Logout successful.",
     });
   } catch (error) {
-    console.error("Error during user logout:", error);
     return res.status(500).json({
       success: false,
       message: "Error while logging out.",
@@ -225,13 +213,14 @@ module.exports.logout = async (req, res) => {
   }
 };
 
-module.exports.delete = async (req, res) => {
+module.exports.deleteUser = async (req, res) => {
   try {
     const user = req.user;
     if (!user || !user._id) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized user." });
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user.",
+      });
     }
 
     const findUser = await userModel.findById(user._id);
@@ -239,27 +228,57 @@ module.exports.delete = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    res.clearCookie("register_token", {
+    res.clearCookie(TOKEN_NAME, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
-    res.clearCookie("login_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+    const { value, error } = validateDeletionData({
+      userData: [
+        {
+          uid: findUser._id,
+          username: findUser.username,
+          email: findUser.email,
+          password: findUser.password,
+          accountType: findUser.accountType,
+          age: findUser.age,
+          gender: findUser.gender,
+        },
+      ],
     });
 
-    res.clearCookie("fb_auth_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: error.details.map((d) => d.message),
+      });
+    }
+
+    await deletionModel.create(value);
+
+    const subject = "Account DELETION notice";
+    const text = `
+    Hi ${findUser.username || "User"},
+    Your account has been successfully deleted. 
+    You can reactivate your account within 30 days by logging in again.
+    Click here:
+    http://localhost:4000/users/reacticate-account
+    If you did not request this, contact support immediately.
+    Regards,
+    CleanCast Support
+    `;
+
+    await sendEmail(findUser.email, subject, text);
 
     await findUser.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Deletion done.",
+    });
   } catch (error) {
-    console.error("Error while Deleting Account:", error);
     return res.status(500).json({
       success: false,
       message: "Error in deleting the account.",

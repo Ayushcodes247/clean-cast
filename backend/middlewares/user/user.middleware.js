@@ -2,6 +2,8 @@ const { userModel } = require("@models/user.model");
 const { blackListTokenModel } = require("@models/blackListToken.model");
 const jwt = require("jsonwebtoken");
 
+const TOKEN_NAME = "auth_token";
+
 module.exports.authenticateUser = async (req, res, next) => {
   try {
     if (req.isAuthenticated()) {
@@ -10,9 +12,7 @@ module.exports.authenticateUser = async (req, res, next) => {
     }
 
     const token =
-      req.cookies?.register_token ||
-      req.cookies?.login_token ||
-      req.cookies?.fb_auth_token ||
+      req.cookies?.[TOKEN_NAME] ||
       (req.headers?.authorization?.startsWith("Bearer ")
         ? req.headers.authorization.split(" ")[1]
         : null);
@@ -38,7 +38,6 @@ module.exports.authenticateUser = async (req, res, next) => {
       return res.status(401).json({
         success: false,
         message: "Invalid or expired authentication token.",
-        error: error.message,
       });
     }
 
@@ -51,10 +50,8 @@ module.exports.authenticateUser = async (req, res, next) => {
     }
 
     req.user = user;
-
     next();
   } catch (error) {
-    console.error("Authentication middleware error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Internal server error.",
