@@ -40,4 +40,4 @@ async function authenticateImage(req, res, next) {
   }
 }
 
-module.exports = authenticateImage;
+module.exports = { authenticateImage };
