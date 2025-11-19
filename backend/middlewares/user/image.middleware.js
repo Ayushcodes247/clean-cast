@@ -23,6 +23,7 @@ async function authenticateImage(req, res, next) {
     const threshold = Number(process.env.NSFW_THRESHOLD) || 0.7;
     const classGot = indications.filter((cls) => {
       if (cls.probability >= threshold) {
+        fs.unlinkSync(filePath);
         return { className: cls.className, probability: cls.probability };
       }
     });
