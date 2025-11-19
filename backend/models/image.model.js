@@ -76,7 +76,7 @@ imageSchema.index({ createdAt: -1 });
 function validateImageData(data) {
   try {
     const schema = Joi.object({
-      uid: Joi.string().required(),
+      uid: Joi.alternatives().try(Joi.string(), Joi.object()).required(),
       accountType: Joi.string().valid("public", "private").required(),
       username: Joi.string().trim().min(3).max(50).required(),
       imageUrl: Joi.string().uri().required(),
