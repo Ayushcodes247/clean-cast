@@ -6,6 +6,7 @@ const {
   profile,
   logout,
   deleteUser,
+  email,
 } = require("@controllers/user/user.controller");
 const { body } = require("express-validator");
 const { authenticateUser } = require("@middlewares/user/user.middleware");
@@ -53,10 +54,22 @@ const loginBodyValidation = [
     .withMessage("Password should be at least 8 characters long."),
 ];
 
+const validateUpdateEmail = [
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Please provide a valid email address."),
+];
+
 router.post("/register", registerBodyValidation, register);
 router.post("/login", loginBodyValidation, login);
 router.get("/profile", authenticateUser, profile);
 router.post("/logout", authenticateUser, logout);
 router.delete("/delete", authenticateUser, deleteUser);
+
+router.patch("/email", validateUpdateEmail , authenticateUser, email);
+router.patch("/username", authenticateUser);
+router.patch("/accountType", authenticateUser);
+router.patch("/password", authenticateUser);
 
 module.exports = router;

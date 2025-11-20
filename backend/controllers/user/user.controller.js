@@ -286,3 +286,43 @@ module.exports.deleteUser = async (req, res) => {
     });
   }
 };
+
+module.exports.email = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    const { email } = req.body;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email not provided." });
+    }
+
+    const findUser = await userModel.findById(user._id);
+    if (!findUser) {
+      return res.status(404).json({
+        success: false,
+        message: `${user?.username} not found.`,
+      });
+    }
+
+    findUser.email = email;
+    await findUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `${user?.username}'s email updated successfully.`,
+    });
+  } catch (error) {
+    console.error("Error while updating the email:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error.",
+    });
+  }
+};
