@@ -326,3 +326,125 @@ module.exports.email = async (req, res) => {
     });
   }
 };
+
+module.exports.username = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    const { username } = req.body;
+    if (!username) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Username not provided." });
+    }
+
+    const findUser = await userModel.findById(user._id);
+    if (!findUser) {
+      return res.status(404).json({
+        success: false,
+        message: `${user?.username} not found.`,
+      });
+    }
+
+    findUser.username = username;
+    await findUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `${user?.username}'s username updated successfully.`,
+    });
+  } catch (error) {
+    console.error("Error while updating the username:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error.",
+    });
+  }
+};
+
+module.exports.accountType = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    const { accountType } = req.body;
+    if (!accountType) {
+      return res
+        .status(400)
+        .json({ success: false, message: "AccountType not provided." });
+    }
+
+    const findUser = await userModel.findById(user._id);
+    if (!findUser) {
+      return res.status(404).json({
+        success: false,
+        message: `${user?.username} not found.`,
+      });
+    }
+
+    findUser.accountType = accountType;
+    await findUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `${user?.username}'s username updated successfully.`,
+    });
+  } catch (error) {
+    console.error("Error while updating the accountType:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error.",
+    });
+  }
+};
+
+module.exports.password = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    const { password } = req.body;
+    if (!password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Password not provided." });
+    }
+
+    const findUser = await userModel.findById(user._id);
+    if (!findUser) {
+      return res.status(404).json({
+        success: false,
+        message: `${user?.username} not found.`,
+      });
+    }
+
+    const hashPass = await userModel.hashPassword(password);
+
+    findUser.password = hashPass;
+    await findUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `${user?.username}'s password updated successfully.`,
+    });
+  } catch (error) {
+    console.error("Error while updating the password:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error.",
+    });
+  }
+};
