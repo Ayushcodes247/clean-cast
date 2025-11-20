@@ -139,3 +139,47 @@ module.exports.fetchImage = async (req, res) => {
     });
   }
 };
+
+module.exports.deleteImage = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user || !user._id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user." });
+    }
+
+    const { fileId } = req.params;
+    if (!fileId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "fileId parameter is required." });
+    }
+
+    const image = await imageModel.findOne({ fileId });
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        message: `No image found for user ${user.username} with fileId ${fileId}.`,
+      });
+    }
+
+    try {
+      await imagekit.deleteFile(fileId);
+    } catch (err) {
+      console.error("ImageKit deletion failed:", err);
+      return res.status(400).json({
+        success: false,
+        message: "Failed to delete image from storage.",
+        error: err.message,
+      });
+    }
+
+    await imageModel.findOneAndDelete({ fileId });
+
+    res.status(200).json({ message: "Image deleted successfully." });
+  } catch (error) {
+    console.error("Error while deleting post:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};

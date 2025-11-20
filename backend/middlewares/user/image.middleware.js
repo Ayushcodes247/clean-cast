@@ -22,12 +22,14 @@ async function authenticateImage(req, res, next) {
     const indications = await moderateImage(fileBuffer);
     const threshold = Number(process.env.NSFW_THRESHOLD) || 0.7;
     const classGot = indications.filter((cls) => {
-      if (cls.probability >= threshold) {
+      if (
+        cls.probability >= threshold &&
+        ["hentai", "porn", "sexy"].includes(cls.className.toLowerCase())
+      ) {
         fs.unlinkSync(filePath);
         return { className: cls.className, probability: cls.probability };
       }
     });
-
     if (isNSFW(indications, threshold)) {
       console.warn(
         `NSFW content detected. Upload rejected for user: ${user.username}`
