@@ -1,7 +1,13 @@
 import React from "react";
+import { Routes , Route , useNavigate } from "react-router-dom";
+import Login from "./Components/Login/Login";
 
 const App = () => {
-  return <div className="h-full bg-amber-300">App</div>;
+ return <>
+ <Routes>
+  <Route path="/" element={<Login/>}/>
+ </Routes>
+ </>
 };
 
 export default App;
