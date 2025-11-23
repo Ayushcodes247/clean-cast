@@ -1,0 +1,8 @@
+@font-face {
+  font-family: heading;
+  src: url("../../assets/fonts/heading.ttf");
+}
+
+.overlay {
+  box-shadow: rgba(0, 0, 0, 0.89) 0px 10px 20px, rgba(255, 255, 255, 0.89) 0px 6px 6px;
+}
