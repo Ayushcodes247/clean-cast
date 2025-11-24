@@ -1,8 +1,33 @@
 @font-face {
-  font-family: heading;
-  src: url("../../assets/fonts/heading.ttf");
+  font-family: dmmedium;
+  src: url("../../assets/fonts/DMSans-Medium.ttf");
+}
+
+@font-face {
+  font-family: dmlight;
+  src: url("../../assets/fonts/DMSans-Light.ttf");
+}
+
+@font-face {
+  font-family: dmextralight;
+  src: url("../../assets/fonts/DMSans-ExtraLight.ttf");
 }
 
 .overlay {
-  box-shadow: rgba(0, 0, 0, 0.89) 0px 10px 20px, rgba(255, 255, 255, 0.89) 0px 6px 6px;
+  box-shadow: rgba(0, 0, 0, 0.89) 0px 10px 20px,
+    rgba(255, 255, 255, 0.89) 0px 6px 6px;
+}
+
+.inp {
+  background: linear-gradient(to right, #11121777, #d2d6de6b);
+  border: 0.3px solid #d2d6de6e;
+  box-shadow: rgba(0, 0, 0, 0.48) 0px 3px 8px;
+}
+
+.inp::placeholder {
+  color: #ffffff9c;
+}
+
+.reg {
+  color: #5e93ff;
 }
