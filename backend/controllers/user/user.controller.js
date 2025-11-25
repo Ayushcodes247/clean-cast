@@ -126,10 +126,14 @@ module.exports.login = async (req, res) => {
       profilePic: user.profilePic,
     };
 
+    const expiresIn = 7 * 24 * 60 * 60;
+
     return res.status(200).json({
       success: true,
       message: "Login successful.",
       user: safeUser,
+      token: token,
+      expiresIn,
     });
   } catch (error) {
     return res.status(500).json({

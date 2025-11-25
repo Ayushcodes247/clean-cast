@@ -31,3 +31,17 @@
 .reg {
   color: #5e93ff;
 }
+
+.btn {
+  background: linear-gradient(#ffffff62, #99999962);
+  box-shadow: rgba(60, 64, 67, 0.8) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.7) 0px 2px 6px 2px;
+  color: white;
+}
+
+.btn-2 {
+  background: linear-gradient(#62cff4, #2c67f2);
+  box-shadow: rgba(60, 64, 67, 0.8) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.7) 0px 2px 6px 2px;
+  color: white;
+}
