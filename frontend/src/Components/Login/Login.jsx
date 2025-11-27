@@ -35,18 +35,15 @@ const Login = () => {
       const msg = response?.message || "Logged in";
       setSuccessMsg(msg);
 
-      // show pop
       if (response?.token) {
         setShowSuccessPop(true);
 
-        // auto close pop after animation and then navigate
         setTimeout(() => {
           setShowSuccessPop(false);
-          // small delay to let pop exit animation run
           setTimeout(() => {
             navigate("/home");
           }, 250);
-        }, 1100); // ~1.1s popup visible like Instagram
+        }, 1100);
       } else {
         console.error("User Login Failed.");
       }
@@ -60,7 +57,6 @@ const Login = () => {
     }
   };
 
-  // framer motion pop variants (Instagram-like pop & fade)
   const popVariants = {
     hidden: { scale: 0.2, opacity: 0 },
     visible: {
@@ -70,7 +66,25 @@ const Login = () => {
     },
     exit: { scale: 0.8, opacity: 0, transition: { duration: 0.18 } },
   };
+const faceBookLoginHandler = () => {
+  const popup = window.open(
+  `${import.meta.env.VITE_BASE_URL}auth/facebook?redirect_uri=${encodeURIComponent(
+    "http://localhost:5173/oauth/facebook/callback"
+  )}`,
+  "fbLogin",
+  "width=500,height=600"
+);
 
+  window.addEventListener("message", (event) => {
+    if (!event.data.token) return;
+
+    localStorage.setItem("auth_token", event.data.token);
+    localStorage.setItem("user", JSON.stringify(event.data.user));
+
+    popup.close();
+    window.location.href = "/home"; 
+  });
+};
   return (
     <div className="h-dvh main relative bg-[#dbd9d9] w-screen flex flex-col justify-between">
       <video
@@ -169,7 +183,10 @@ const Login = () => {
           </div>
 
           <div className="flex justify-center">
-            <button className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]">
+            <button
+              onClick={faceBookLoginHandler}
+              className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"
+            >
               Facebook
             </button>
           </div>

@@ -5,7 +5,7 @@ dotenv.config();
 
 const express = require("express");
 const app = express();
-const path = require("path")
+const path = require("path");
 
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -20,18 +20,24 @@ const checkDBConnection = require("@middlewares/DB/db.middleware");
 const { rateLimit } = require("express-rate-limit");
 
 const masterRateLimiter = rateLimit({
-  windowMs : 15 * 60 * 1000,
-  max : 200,
-  message: { message: "Too many requests, please try again later." }
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { message: "Too many requests, please try again later." },
 });
 
 connectTODB();
 
 app.use(cookieParser());
-app.use(express.json({ limit : "10mb" }));
-app.use(express.urlencoded({ extended: true , limit : "10mb" }));
-app.use("/public", express.static(path.join( __dirname , "public" )));
-app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use("/public", express.static(path.join(__dirname, "public")));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    methods: ["GET", "POST", "DELETE", "PATCH"],
+    credentials: true,
+  })
+);
 app.use(
   session({
     saveUninitialized: false,
@@ -58,7 +64,7 @@ app.use(passport.session());
 
 app.use(checkDBConnection);
 
-app.use("/api/", masterRateLimiter , checkDBConnection , router);
+app.use("/api/", masterRateLimiter, checkDBConnection, router);
 
 app.get("/health", (req, res) => {
   return res.status(200).json({ status: "ok", message: "App running fine." });
