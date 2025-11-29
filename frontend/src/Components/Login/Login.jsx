@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { loginUserAction } from "../../actions/login.action";
 import { useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
+import FacebookLogin from "@greatsumini/react-facebook-login"
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -66,25 +67,14 @@ const Login = () => {
     },
     exit: { scale: 0.8, opacity: 0, transition: { duration: 0.18 } },
   };
-const faceBookLoginHandler = () => {
-  const popup = window.open(
-  `${import.meta.env.VITE_BASE_URL}auth/facebook?redirect_uri=${encodeURIComponent(
-    "http://localhost:5173/oauth/facebook/callback"
-  )}`,
-  "fbLogin",
-  "width=500,height=600"
-);
 
-  window.addEventListener("message", (event) => {
-    if (!event.data.token) return;
-
-    localStorage.setItem("auth_token", event.data.token);
-    localStorage.setItem("user", JSON.stringify(event.data.user));
-
-    popup.close();
-    window.location.href = "/home"; 
-  });
-};
+  const faceBookLoginHandler = (response) => {
+    if (response?.status === "unknown") {
+        console.error('Sorry!', 'Something went wrong with facebook Login.');
+     return;
+    }
+    console.log(response);
+  }
   return (
     <div className="h-dvh main relative bg-[#dbd9d9] w-screen flex flex-col justify-between">
       <video
@@ -183,37 +173,44 @@ const faceBookLoginHandler = () => {
           </div>
 
           <div className="flex justify-center">
-            <button
+            {/* <button
               onClick={faceBookLoginHandler}
               className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"
             >
               Facebook
-            </button>
+            </button> */}
+            <FacebookLogin appId={import.meta.env.VITE_FB_APP_ID} onSuccess={(response) => {
+              console.log("Login success!", response);
+            }} onFail={(error) => {
+              console.error("Login Failed!", error);
+            }} onProfileSuccess={(response) => {
+              console.log("Get profile Success!", response)
+            }} className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"/>
           </div>
+          {/*  */}
+          {/* Success Pop (Framer Motion) */}
+          <AnimatePresence>
+            {showSuccessPop && (
+              <motion.div
+                className="fixed left-1/2 top-24 z-50 -translate-x-1/2"
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={popVariants}
+                style={{ pointerEvents: "none" }}
+              >
+                <div className="flex items-center gap-3 bg-white rounded-full px-5 py-2 shadow-xl">
+                  {/* you can replace emoji with an icon */}
+                  <div className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-700 font-bold">
+                    ✓
+                  </div>
+                  <div className="text-black font-medium">{successMsg}</div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-
-      {/* Success Pop (Framer Motion) */}
-      <AnimatePresence>
-        {showSuccessPop && (
-          <motion.div
-            className="fixed left-1/2 top-24 z-50 -translate-x-1/2"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={popVariants}
-            style={{ pointerEvents: "none" }}
-          >
-            <div className="flex items-center gap-3 bg-white rounded-full px-5 py-2 shadow-xl">
-              {/* you can replace emoji with an icon */}
-              <div className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-700 font-bold">
-                ✓
-              </div>
-              <div className="text-black font-medium">{successMsg}</div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
