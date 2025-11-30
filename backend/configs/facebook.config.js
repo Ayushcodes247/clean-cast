@@ -15,6 +15,9 @@ passport.use(
       profileFields: ["id", "displayName", "emails", "birthday", "photos"],
     },
     async (accessToken, refreshToken, profile, done) => {
+      async (req,res) => {
+        const { username , email } = req.body;
+      }
       try {
         let user = await userModel.findOne({
           email: profile.emails?.[0]?.value,

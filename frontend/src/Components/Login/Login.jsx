@@ -8,6 +8,7 @@ import { loginUserAction } from "../../actions/login.action";
 import { useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import FacebookLogin from "@greatsumini/react-facebook-login"
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -68,13 +69,12 @@ const Login = () => {
     exit: { scale: 0.8, opacity: 0, transition: { duration: 0.18 } },
   };
 
-  const faceBookLoginHandler = (response) => {
-    if (response?.status === "unknown") {
-        console.error('Sorry!', 'Something went wrong with facebook Login.');
-     return;
-    }
-    console.log(response);
-  }
+  const facebookLoginHandler = async (response) => {
+    const userData = { username : response.name , email : response.email };
+    console.log(userData)
+    const axiosRespose = await axios.post();
+  };
+
   return (
     <div className="h-dvh main relative bg-[#dbd9d9] w-screen flex flex-col justify-between">
       <video
@@ -183,9 +183,9 @@ const Login = () => {
               console.log("Login success!", response);
             }} onFail={(error) => {
               console.error("Login Failed!", error);
-            }} onProfileSuccess={(response) => {
-              console.log("Get profile Success!", response)
-            }} className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"/>
+            }} onProfileSuccess={
+              facebookLoginHandler
+            } className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"/>
           </div>
           {/*  */}
           {/* Success Pop (Framer Motion) */}
