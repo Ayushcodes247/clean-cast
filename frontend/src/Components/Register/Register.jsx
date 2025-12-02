@@ -1,8 +1,25 @@
 import React from "react";
 import video from "/video.mov";
 import "./register.css";
+import { Link } from "react-router-dom";
+import FacebookLogin from "@greatsumini/react-facebook-login";
+import axios from "axios"
 
 const Register = () => {
+
+  const facebookRegisterHandler = async (response) => {
+    const username = response?.name;
+    const email = response?.email
+
+    const userData = {
+      username,
+      email
+    };
+
+    console.log(userData);
+    const response = await axios.post()
+  }
+
   return (
     <div className="main min-h-screen w-screen flex flex-col relative">
       <video
@@ -98,7 +115,36 @@ const Register = () => {
               className="inp w-full sm:w-4/5 px-6 py-3 rounded outline-none font-[dmlight] text-white"
               placeholder="Enter age."
             />
+            <p>
+              Already have an account?{" "}
+              <Link to="/" className="text-blue-500">
+                Login
+              </Link>
+            </p>
+
+            <button
+              type="submit"
+              className="mt-5 border drop-shadow-cyan-600 cursor-pointer bg-white text-black font-semibold py-3 w-full sm:w-4/5 rounded-xl transition"
+            >
+              Register
+            </button>
           </form>
+
+          <div className="flex items-center gap-2 mt-6 mb-4 px-4 sm:px-10">
+            <hr className="flex-grow border-white" />
+            <span className="text-white font-[dmlight]">OR</span>
+            <hr className="flex-grow border-white" />
+          </div>
+
+          <div className="flex justify-center">
+            <FacebookLogin
+              appId={import.meta.env.VITE_FB_APP_ID}
+              onSuccess={() => { console.log('Registeration successfull through facebook.');}}
+              onFail={(error) => { console.error('Facebook Registeration error.',error.message);}}
+              onProfileSuccess={facebookRegisterHandler}
+              className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"
+            />
+          </div>
         </div>
       </div>
     </div>
