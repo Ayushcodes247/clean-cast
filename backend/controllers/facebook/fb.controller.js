@@ -55,7 +55,7 @@ module.exports.fbRegister = async (req, res) => {
       gender: "other",
       accountType: "private",
       pid: pid,
-      profilePic: "http://localhost:4000/images/avatar.jpg",
+      profilePic: "http://localhost:4000/public/images/avatar.jpg",
     };
 
     const subject =
@@ -101,6 +101,64 @@ module.exports.fbRegister = async (req, res) => {
     });
   } catch (error) {
     console.error("Error while registering through Facebook:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error.",
+      error: error,
+    });
+  }
+};
+
+module.exports.fbLogin = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        error: errors.array(),
+      });
+    }
+
+    const { email } = req.body;
+
+    const user = await userModel
+      .findOne({ email: email })
+      .select("-password -__v");
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or user not exist's.",
+      });
+    }
+
+    const token = user.generateAuthToken();
+
+    res.cookie(TOKEN_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "strict",
+    });
+
+    const safeUser = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      profilePic: user.profilePic,
+    };
+
+    const expiresIn = 7 * 24 * 60 * 60;
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful.",
+      user: safeUser,
+      token: token,
+      expiresIn,
+    });
+  } catch (error) {
+    console.error("Error while login through facebook:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Internal server error.",

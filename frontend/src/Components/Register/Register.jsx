@@ -1,24 +1,51 @@
 import React from "react";
 import video from "/video.mov";
 import "./register.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import FacebookLogin from "@greatsumini/react-facebook-login";
-import axios from "axios"
+import axios from "axios";
 
 const Register = () => {
+  document.title = "CleanCast | Register Page.";
+
+  const navigate = useNavigate();
 
   const facebookRegisterHandler = async (response) => {
     const username = response?.name;
-    const email = response?.email
+    const email = response?.email;
 
-    const userData = {
-      username,
-      email
-    };
+    const { data, status } = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}auth/fb/register`,
+      { username, email },
+      { withCredentials: true },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    console.log(userData);
-    const response = await axios.post()
-  }
+    if (status === 201 && data.user && data.token) {
+      const { password, __v, ...safeUser } = data.user;
+      localStorage.setItem("CCUser", JSON.stringify(safeUser));
+      localStorage.setItem("CCToken", data.token);
+
+      const expiresIn = data.expiresIn || 7 * 24 * 60 * 60 * 1000;
+      const expireyTime = new Date().getTime() + expiresIn * 1000;
+      localStorage.setItem("CCTokenExpirey", expireyTime);
+
+      setTimeout(() => {
+        localStorage.removeItem("CCUser");
+        localStorage.removeItem("CCToken");
+        localStorage.removeItem("CCTokenExpirey");
+        window.location.href = "/";
+      }, expiresIn * 1000);
+
+      navigate("/home");
+    } else {
+      console.error("Facebook Registeration failed.");
+    }
+  };
 
   return (
     <div className="main min-h-screen w-screen flex flex-col relative">
@@ -139,8 +166,12 @@ const Register = () => {
           <div className="flex justify-center">
             <FacebookLogin
               appId={import.meta.env.VITE_FB_APP_ID}
-              onSuccess={() => { console.log('Registeration successfull through facebook.');}}
-              onFail={(error) => { console.error('Facebook Registeration error.',error.message);}}
+              onSuccess={() => {
+                console.log("Registeration successfull through facebook.");
+              }}
+              onFail={(error) => {
+                console.error("Facebook Registeration error.", error.message);
+              }}
               onProfileSuccess={facebookRegisterHandler}
               className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"
             />
