@@ -1,14 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import video from "/video.mov";
 import "./register.css";
 import { Link, useNavigate } from "react-router-dom";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
+import { useForm } from "react-hook-form";
+import { registerAction } from "../../actions/register.action";
+import { useDispatch } from "react-redux"
 
 const Register = () => {
-  document.title = "CleanCast | Register Page.";
+  document.title = "CleanCast | Register Page";
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [age, setAge] = useState(0);
+  const [password, setPassword] = useState("");
+  const [gender, setGender] = useState("");
+  const [accountType, setAccountType] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    mode: "onBlur",
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      gender: "",
+      age: 0,
+      accountType: "",
+    },
+  });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const facebookRegisterHandler = async (response) => {
     const username = response?.name;
@@ -43,7 +70,32 @@ const Register = () => {
 
       navigate("/home");
     } else {
-      console.error("Facebook Registeration failed.");
+      console.error("Facebook Registration failed.");
+    }
+  };
+
+  const submitHandler = async () => {
+    try{
+
+      const response = await dispatch(
+        registerAction({ username , email , password , age , gender , accountType })
+      );
+
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setAge("");
+      setGender("");
+      setAccountType("");
+
+      if(response?.token){
+        navigate("/home");
+      }else{
+        console.error("Register Failed");
+      }
+    }catch(error){
+      console.error("Register Failed:", error);
+      alert("Check Console an error occured while registering.");
     }
   };
 
@@ -79,69 +131,133 @@ const Register = () => {
             Register
           </h2>
           <h3 className="text-white text-center mt-1 text-lg sm:text-xl font-[dmlight]">
-            And start connecting securly
+            And start connecting securely
           </h3>
         </div>
 
         <div className="text-white px-2 py-4">
-          <form className="flex flex-col items-center w-full mt-4 gap-4">
+          <form
+            className="flex flex-col items-center w-full mt-4 gap-4"
+            onSubmit={handleSubmit(submitHandler)}
+          >
+            {/* Username */}
             <input
               type="text"
               className="inp w-full sm:w-4/5 px-6 py-3 rounded outline-none font-[dmlight] text-white"
               placeholder="Enter username."
+              {...register("username", { required: "Username is required" })}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
+            {errors.username && (
+              <p className="text-red-500">{errors.username.message}</p>
+            )}
 
+            {/* Email */}
             <input
               type="email"
               className="inp w-full sm:w-4/5 px-6 py-3 rounded outline-none font-[dmlight] text-white"
               placeholder="Enter email."
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Enter a valid email",
+                },
+              })}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
+            {errors.email && (
+              <p className="text-red-500">{errors.email.message}</p>
+            )}
 
+            {/* Password */}
             <input
               type="password"
               className="inp w-full sm:w-4/5 px-6 py-3 rounded outline-none font-[dmlight] text-white"
               placeholder="Enter password."
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 8,
+                  message: "Password must be 8+ characters",
+                },
+              })}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
+            {errors.password && (
+              <p className="text-red-500">{errors.password.message}</p>
+            )}
 
-            <div className="flex flex-col gap-4 w-full items-center">
-              {/* Gender */}
-              <div className="inp w-full sm:w-4/5 px-6 py-3 rounded outline-none font-[dmlight] text-white flex flex-col gap-2">
-                <label htmlFor="gender">Select Gender:</label>
-                <select
-                  id="gender"
-                  className="bg-transparent border border-white/30 rounded px-2 py-2 focus:outline-none"
-                >
-                  <option value="male" className="text-black">
-                    Male
-                  </option>
-                  <option value="female" className="text-black">
-                    Female
-                  </option>
-                </select>
-              </div>
+            {/* Gender */}
+            <div className="inp w-full sm:w-4/5 px-6 py-3 rounded font-[dmlight] text-white flex flex-col gap-2">
+              <label htmlFor="gender">Select Gender:</label>
 
-              {/* Account Type */}
-              <div className="inp w-full sm:w-4/5 px-6 py-3 rounded outline-none font-[dmlight] text-white flex flex-col gap-2">
-                <label htmlFor="accountType">Select Account Type:</label>
-                <select
-                  id="accountType"
-                  className="bg-transparent border border-white/30 rounded px-2 py-2 focus:outline-none"
-                >
-                  <option value="private" className="text-black">
-                    Private
-                  </option>
-                  <option value="public" className="text-black">
-                    Public
-                  </option>
-                </select>
-              </div>
+              <select
+                id="gender"
+                className="bg-transparent border border-white/30 rounded px-2 py-2 focus:outline-none"
+                {...register("gender", { required: "Gender is required" })}
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <option value="" className="text-black">
+                  Select
+                </option>
+                <option value="male" className="text-black">
+                  Male
+                </option>
+                <option value="female" className="text-black">
+                  Female
+                </option>
+              </select>
+
+              {errors.gender && (
+                <p className="text-red-500">{errors.gender.message}</p>
+              )}
             </div>
 
+            {/* Account Type */}
+            <div className="inp w-full sm:w-4/5 px-6 py-3 rounded font-[dmlight] text-white flex flex-col gap-2">
+              <label htmlFor="accountType">Select Account Type:</label>
+
+              <select
+                id="accountType"
+                className="bg-transparent border border-white/30 rounded px-2 py-2 focus:outline-none"
+                {...register("accountType", {
+                  required: "Account type is required",
+                })}
+                value={accountType}
+                onChange={(e) => setAccountType(e.target.value)}
+              >
+                <option value="" className="text-black">
+                  Select
+                </option>
+                <option value="private" className="text-black">
+                  Private
+                </option>
+                <option value="public" className="text-black">
+                  Public
+                </option>
+              </select>
+
+              {errors.accountType && (
+                <p className="text-red-500">{errors.accountType.message}</p>
+              )}
+            </div>
+
+            {/* Age */}
             <input
               type="number"
               className="inp w-full sm:w-4/5 px-6 py-3 rounded outline-none font-[dmlight] text-white"
               placeholder="Enter age."
+              {...register("age", { required: "Age is required" })}
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
             />
+            {errors.age && <p className="text-red-500">{errors.age.message}</p>}
+
             <p>
               Already have an account?{" "}
               <Link to="/" className="text-blue-500">
@@ -157,20 +273,22 @@ const Register = () => {
             </button>
           </form>
 
+          {/* Divider */}
           <div className="flex items-center gap-2 mt-6 mb-4 px-4 sm:px-10">
             <hr className="flex-grow border-white" />
             <span className="text-white font-[dmlight]">OR</span>
             <hr className="flex-grow border-white" />
           </div>
 
+          {/* Facebook Login */}
           <div className="flex justify-center">
             <FacebookLogin
               appId={import.meta.env.VITE_FB_APP_ID}
               onSuccess={() => {
-                console.log("Registeration successfull through facebook.");
+                console.log("Registration successful through Facebook.");
               }}
               onFail={(error) => {
-                console.error("Facebook Registeration error.", error.message);
+                console.error("Facebook Registration error.", error.message);
               }}
               onProfileSuccess={facebookRegisterHandler}
               className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"
