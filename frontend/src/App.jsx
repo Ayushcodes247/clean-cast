@@ -4,6 +4,8 @@ import Login from "./Components/Login/Login";
 import UserAuthentication from "./Components/UserAuthentication/User.authentication";
 import Home from "./Components/Home/Home";
 import Register from "./Components/Register/Register";
+import Logout from "./Components/Logout/Logout";
+import Profile from "./Components/Profile/Profile";
 
 const App = () => {
   const navigate = useNavigate();
@@ -46,6 +48,19 @@ const App = () => {
             </UserAuthentication>
           }
         />
+        <Route
+          path="/users/logout"
+          element={
+            <UserAuthentication>
+              <Logout />
+            </UserAuthentication>
+          }
+        />
+        <Route path="/users/profile" element={
+          <UserAuthentication>
+            <Profile/>
+          </UserAuthentication>
+        }/>
       </Routes>
     </>
   );

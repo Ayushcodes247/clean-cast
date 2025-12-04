@@ -91,7 +91,7 @@ const validateUpdatePassword = [
 router.post("/register", registerBodyValidation, register);
 router.post("/login", loginBodyValidation, login);
 router.get("/profile", authenticateUser, profile);
-router.post("/logout", authenticateUser, logout);
+router.get("/logout", authenticateUser, logout);
 router.delete("/delete", authenticateUser, deleteUser);
 
 router.patch("/email", validateUpdateEmail, authenticateUser, email);
