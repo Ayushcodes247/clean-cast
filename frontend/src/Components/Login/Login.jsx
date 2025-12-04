@@ -101,7 +101,7 @@ const Login = () => {
 
       navigate("/home");
     } else {
-      console.error("Facebook Registration failed.");
+      console.error("Facebook Login failed.");
     }
   };
 
