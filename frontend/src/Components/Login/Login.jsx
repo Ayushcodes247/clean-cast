@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { loginUserAction } from "../../actions/login.action";
 import { useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import FacebookLogin from "@greatsumini/react-facebook-login"
+import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
 
 const Login = () => {
@@ -70,9 +70,39 @@ const Login = () => {
   };
 
   const facebookLoginHandler = async (response) => {
-    const userData = { username : response.name , email : response.email };
-    console.log(userData)
-    const axiosRespose = await axios.post();
+    const email = response.email;
+
+    const { data, status } = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}auth/fb/login`,
+      { email },
+      { withCredentials: true },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (status === 200 && data.user && data.token) {
+      const { password, __v, ...safeUser } = data.user;
+      localStorage.setItem("CCUser", JSON.stringify(safeUser));
+      localStorage.setItem("CCToken", data.token);
+
+      const expiresIn = data.expiresIn || 7 * 24 * 60 * 60 * 1000;
+      const expireyTime = new Date().getTime() + expiresIn * 1000;
+      localStorage.setItem("CCTokenExpirey", expireyTime);
+
+      setTimeout(() => {
+        localStorage.removeItem("CCUser");
+        localStorage.removeItem("CCToken");
+        localStorage.removeItem("CCTokenExpirey");
+        window.location.href = "/";
+      }, expiresIn * 1000);
+
+      navigate("/home");
+    } else {
+      console.error("Facebook Registration failed.");
+    }
   };
 
   return (
@@ -173,19 +203,17 @@ const Login = () => {
           </div>
 
           <div className="flex justify-center">
-            {/* <button
-              onClick={faceBookLoginHandler}
+            <FacebookLogin
+              appId={import.meta.env.VITE_FB_APP_ID}
+              onSuccess={(response) => {
+                console.log("Login success!", response);
+              }}
+              onFail={(error) => {
+                console.error("Login Failed!", error);
+              }}
+              onProfileSuccess={facebookLoginHandler}
               className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"
-            >
-              Facebook
-            </button> */}
-            <FacebookLogin appId={import.meta.env.VITE_FB_APP_ID} onSuccess={(response) => {
-              console.log("Login success!", response);
-            }} onFail={(error) => {
-              console.error("Login Failed!", error);
-            }} onProfileSuccess={
-              facebookLoginHandler
-            } className="btn-2 bg-blue-600 text-white rounded-lg text-xl px-10 py-3 font-[dmlight]"/>
+            />
           </div>
           {/*  */}
           {/* Success Pop (Framer Motion) */}

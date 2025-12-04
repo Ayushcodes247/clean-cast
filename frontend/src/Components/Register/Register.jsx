@@ -6,7 +6,7 @@ import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { registerAction } from "../../actions/register.action";
-import { useDispatch } from "react-redux"
+import { useDispatch } from "react-redux";
 
 const Register = () => {
   document.title = "CleanCast | Register Page";
@@ -75,10 +75,9 @@ const Register = () => {
   };
 
   const submitHandler = async () => {
-    try{
-
+    try {
       const response = await dispatch(
-        registerAction({ username , email , password , age , gender , accountType })
+        registerAction({ username, email, password, age, gender, accountType })
       );
 
       setUsername("");
@@ -88,12 +87,12 @@ const Register = () => {
       setGender("");
       setAccountType("");
 
-      if(response?.token){
+      if (response?.token) {
         navigate("/home");
-      }else{
+      } else {
         console.error("Register Failed");
       }
-    }catch(error){
+    } catch (error) {
       console.error("Register Failed:", error);
       alert("Check Console an error occured while registering.");
     }
