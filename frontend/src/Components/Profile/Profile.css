@@ -1,0 +1,29 @@
+@font-face {
+  font-family: heading;
+  src: url("../../assets/fonts/heading.ttf");
+}
+
+@font-face {
+  font-family: dmmedium;
+  src: url("../../assets/fonts/DMSans-Medium.ttf");
+}
+
+@font-face {
+  font-family: dmlight;
+  src: url("../../assets/fonts/DMSans-Light.ttf");
+}
+
+@font-face {
+  font-family: dmextralight;
+  src: url("../../assets/fonts/DMSans-ExtraLight.ttf");
+}
+
+.nav{
+  border-right: 0.3px solid #262626;
+}
+
+.brand {
+  font-family: heading;
+  font-weight: 500;
+  text-shadow: 4px 4px 4px rgba(0, 0, 0, 0.973);
+}

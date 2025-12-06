@@ -1,14 +1,15 @@
-import React from 'react'
+import React from "react";
+import "./Profile.css";
+import Navigation from "../Navigation/Navigation";
 
 const Profile = () => {
-
-    document.title = "CleanCast | Profile";
+  document.title = "CleanCast | Profile";
 
   return (
-    <div className='h-screen w-screen bg-purple-400'>
-        
+    <div className="h-screen w-screen main relative bg-[#0C1014]">
+      <Navigation />
     </div>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;
